@@ -1,9 +1,5 @@
-import scala.concurrent.{Future, Await}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import slick.backend.DatabasePublisher
-import slick.driver.H2Driver.api._
 
+/*
 // The main application
 object HelloSlick extends App {
   val db = Database.forConfig("h2mem1")
@@ -192,3 +188,4 @@ object HelloSlick extends App {
 
   } finally db.close
 }
+*/
