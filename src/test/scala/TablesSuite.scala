@@ -1,52 +1,44 @@
-import org.h2.engine.Database
+import java.sql.Timestamp
+
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Seconds, Span}
 import slick.jdbc.meta.MTable
-import slick.lifted.TableQuery
+import slick.driver.H2Driver.api._
 
 class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
 
   implicit override val patienceConfig = PatienceConfig(timeout = Span(5, Seconds))
 
-  val suppliers = TableQuery[Suppliers]
-  val coffees = TableQuery[Coffees]
-  
-  var db: Database = _
+  var db : Database = _
+  var repo : TimeRecordsRepository = _
 
   def createSchema() =
-    db.run((suppliers.schema ++ coffees.schema).create).futureValue
+    repo.init.futureValue
   
-  def insertSupplier(): Int =
-    db.run(suppliers += (101, "Acme, Inc.", "99 Market Street", "Groundsville", "CA", "95199")).futureValue
+  def insertTimestampRecords(): Any =
+    repo.addRecords(
+      Seq(TimeRecord(Timestamp.valueOf("2018-03-27 09:01:10")))).futureValue
 
-  before { db = Database.forConfig("h2mem1") }
+  before {
+    db = Database.forConfig("h2mem1")
+    repo = new TimeRecordRepositoryImpl(db) }
 
-  test("Creating the Schema works") {
+  test("Creating the Schema works on Repo init") {
     createSchema()
 
     val tables = db.run(MTable.getTables).futureValue
 
-    assert(tables.size == 2)
-    assert(tables.count(_.name.name.equalsIgnoreCase("suppliers")) == 1)
-    assert(tables.count(_.name.name.equalsIgnoreCase("coffees")) == 1)
+    assert(tables.size == 1)
+    assert(tables.count(_.name.name.equalsIgnoreCase("TIMERECORDS")) == 1)
   }
 
-  test("Inserting a Supplier works") {
+  test("Inserting a TimeRecord works on Repo addRecords") {
     createSchema()
 
-    val insertCount = insertSupplier()
-    assert(insertCount == 1)
+    val insertCount = insertTimestampRecords()
+    assert(insertCount.asInstanceOf[Some[Int]].get == 1)
   }
 
-  test("Query Suppliers works") {
-    createSchema()
-    insertSupplier()
-    val results = db.run(suppliers.result).futureValue
-    assert(results.size == 1)
-    assert(results.head._1 == 101)
-  }
-  
-  after { db.close }
-
+  after { repo.close }
 }
