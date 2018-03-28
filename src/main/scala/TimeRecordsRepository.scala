@@ -31,8 +31,6 @@ class TimeRecordRepositoryImpl(val db : Database) extends TimeRecordsRepository 
     db.stream(backdatingTimeRecordsQuery
       .transactionally
       .withStatementParameters(fetchSize = 1000))
-      //.foreach(println)
-      //.mapResult(r => r)
   }
 
   override def init: Future[Any] = {

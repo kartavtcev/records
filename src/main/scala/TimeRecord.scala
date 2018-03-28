@@ -3,7 +3,7 @@ import java.sql.Timestamp
 import slick.driver.H2Driver.api._
 import slick.jdbc.GetResult
 
-case class TimeRecord(name: Timestamp, id: Option[Int] = None)
+case class TimeRecord(timestamp: Timestamp, id: Option[Int] = None)
 
 object TimeRecordImplicits {
   implicit val getTimeRecordResult = GetResult(r => TimeRecord(r.<<, r.<<))
