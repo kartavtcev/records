@@ -6,7 +6,7 @@ import org.scalatest.time.{Seconds, Span}
 import slick.jdbc.meta.MTable
 import slick.driver.H2Driver.api._
 
-class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
+class TimeRecordsRepositorySuite extends FunSuite with BeforeAndAfter with ScalaFutures {
 
   implicit override val patienceConfig = PatienceConfig(timeout = Span(5, Seconds))
 
