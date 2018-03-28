@@ -23,6 +23,8 @@ object RecordsApp extends App {
             ))
         }
         .flatMap { _ =>
+          // The Publisher captures a Database plus a DBIO action.
+          // The action does not run until you consume the stream.
           repo.getAllBackdatingRecords().foreach(println)
         }
     Await.result(f, Duration.Inf)

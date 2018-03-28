@@ -1,9 +1,12 @@
+import org.h2.engine.Database
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{Seconds, Span}
+import slick.jdbc.meta.MTable
+import slick.lifted.TableQuery
 
 class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
 
-  /*
   implicit override val patienceConfig = PatienceConfig(timeout = Span(5, Seconds))
 
   val suppliers = TableQuery[Suppliers]
@@ -45,5 +48,5 @@ class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
   }
   
   after { db.close }
-  */
+
 }
