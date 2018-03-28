@@ -1,6 +1,6 @@
-name := "hello-slick"
+name := "backdating-records"
 
-mainClass in Compile := Some("HelloSlick")
+mainClass in Compile := Some("RecordsApp")
 
 libraryDependencies ++= List(
   "com.typesafe.slick" %% "slick" % "3.1.1",

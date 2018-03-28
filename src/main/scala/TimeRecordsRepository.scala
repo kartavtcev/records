@@ -5,14 +5,14 @@ import slick.driver.H2Driver.api._
 import scala.concurrent.Future
 
 trait TimeRecordsRepository {
-    def addRecords(records : Seq[TimeRecord]) : Future[Any] // Any is for general return which isn't used here.
+    def addRecords(records : Seq[TimeRecord]) : Future[Any] // Any is for general return which isn't used here. May be to replace with specific type later.
     /*
      If you have a streaming action, you can use db.stream instead of db.run to get a Reactive Streams Publisher instead of a Future.
      This allows data to be streamed asynchronously from the database with any compatible library like Akka Streams.
      Slick itself does not provide a full set of tools for working with streams but it has a .foreach utility method for consuming a stream:
     */
     def getAllBackdatingRecords : DatabasePublisher[TimeRecord] // emulate big data consumption with streaming
-    def init : Future[Any]
+    def init : Future[Any] // see above regarding Any
     def close : Unit
 }
 
