@@ -16,12 +16,12 @@ class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
   
   def insertSupplier(): Int =
     db.run(suppliers += (101, "Acme, Inc.", "99 Market Street", "Groundsville", "CA", "95199")).futureValue
-  
+
   before { db = Database.forConfig("h2mem1") }
-  
+
   test("Creating the Schema works") {
     createSchema()
-    
+
     val tables = db.run(MTable.getTables).futureValue
 
     assert(tables.size == 2)
@@ -31,11 +31,11 @@ class TablesSuite extends FunSuite with BeforeAndAfter with ScalaFutures {
 
   test("Inserting a Supplier works") {
     createSchema()
-    
+
     val insertCount = insertSupplier()
     assert(insertCount == 1)
   }
-  
+
   test("Query Suppliers works") {
     createSchema()
     insertSupplier()

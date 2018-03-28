@@ -13,12 +13,12 @@ import TimeRecordImplicits._
 trait TimeRecordRepository {
     def addRecords(records : Seq[TimeRecord]) : Future[Any]
     def getAllBackdatingRecords() : DatabasePublisher[TimeRecord] //Future[Seq[TimeRecord]]
+    def init() : Future[Any]
     def close() : Unit
 }
 
 class TimeRecordRepositoryImpl(val db : H2Driver.backend.Database) extends TimeRecordRepository {
   val timeRecords = TableQuery[TimeRecords]
-  db.run(timeRecords.schema.create)
 
   def backdatingTimeRecordsQuery =
     sql"""select * from TIMERECORDS T1 where EXISTS
@@ -26,7 +26,7 @@ class TimeRecordRepositoryImpl(val db : H2Driver.backend.Database) extends TimeR
           where T2.ID < T1.ID AND T2.TIMESTAMP > T1.TIMESTAMP)""".as[TimeRecord]
 
   override def addRecords(records: Seq[TimeRecord]): Future[Any] = {
-    db.run(DBIO.sequence(records.map(timeRecords += _)))
+    db.run(timeRecords ++= records)
   }
 
   override def getAllBackdatingRecords(): DatabasePublisher[TimeRecord] = { // addressing possibly large volume of data
@@ -37,26 +37,32 @@ class TimeRecordRepositoryImpl(val db : H2Driver.backend.Database) extends TimeR
       //.mapResult(r => r)
   }
 
+  override def init(): Future[Any] = {
+    println("TIMERECORDS")
+    db.run(timeRecords.schema.create)
+  }
+
   override def close(): Unit = db.close()
 }
 
-
-
-object TimeRecordRepositoryObj extends App {
+object TimeRecordObj extends App {
 
   val repo = new TimeRecordRepositoryImpl(Database.forConfig("h2mem1"))
   try {
-    val f = repo.addRecords(
-      Seq(
-        TimeRecord(Timestamp.valueOf("2018-03-27 09:01:10")),
-        TimeRecord(Timestamp.valueOf("2018-03-27 09:01:11")),
-        TimeRecord(Timestamp.valueOf("2018-03-21 09:01:11")),
-        TimeRecord(Timestamp.valueOf("2018-03-27 09:01:12")),
-        TimeRecord(Timestamp.valueOf("2018-03-27 01:01:11")),
-        TimeRecord(Timestamp.valueOf("2018-03-27 10:01:12"))
-      ))
-      .flatMap { _ =>
-        repo.getAllBackdatingRecords().foreach(println)
+    val f =
+      repo.init()
+          .flatMap { _ =>
+            repo.addRecords(
+              Seq(TimeRecord(Timestamp.valueOf("2018-03-27 09:01:10")),
+                TimeRecord(Timestamp.valueOf("2018-03-27 09:01:11")),
+                TimeRecord(Timestamp.valueOf("2018-03-21 09:01:11")),
+                TimeRecord(Timestamp.valueOf("2018-03-27 09:01:12")),
+                TimeRecord(Timestamp.valueOf("2018-03-27 01:01:11")),
+                TimeRecord(Timestamp.valueOf("2018-03-27 10:01:12"))
+              ))
+          }
+          .flatMap { _ =>
+            repo.getAllBackdatingRecords().foreach(println)
       }
     Await.result(f, Duration.Inf)
   } finally repo.close()
